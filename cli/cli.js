@@ -1,5 +1,5 @@
 const { Command } = require('commander');
-const inquirer = require('@inquirer/inquirer');
+const inquirer = require('@inquirer/prompts');
 const program = new Command();
 
 program
@@ -9,30 +9,35 @@ program
         console.log(`Hello, ${name}!`);
     });
 
-program
-    .command('login')
-    .description('Login with your username and password')
-    .action(async () => {
-        try {
+async function handleLogin() {
+    try {
         const answers = await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'username',
-          message: 'Enter your username:',
-        },
-        {
-          type: 'password',
-          name: 'password',
-          message: 'Enter your password:',
-        }
-      ]);
-  
-      console.log(`Username: ${answers.username}`);
-      console.log('Password has been securely entered.');
-        } catch (error) {
-            console.error('Error during prompt:', error);
-        }
-    });
+          {
+            type: 'input',
+            name: 'username',
+            message: 'Enter your username:',
+          },
+          {
+            type: 'password',
+            name: 'password',
+            message: 'Enter your password:',
+          },
+        ]);
+    
+        console.log(`\nLogin Successful!`);
+        console.log(`Username: ${answers.username}`);
+        console.log('Password: [hidden for security]');
+      } catch (error) {
+        console.error('Error during login:', error.message);
+      }
+    }
+    
+    program
+      .command('login')
+      .description('Login with your username and password')
+      .action(() => {
+        handleLogin();
+      });
   
 
 program.parse(process.argv);
