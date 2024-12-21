@@ -22,6 +22,7 @@ program
       rl.stdoutMuted = true;
       rl.question('Enter your password: ', (password) => {
         rl.close();
+          
         console.log(`\nUsername: ${username}`);
         console.log('Password: [hidden]');
       });
