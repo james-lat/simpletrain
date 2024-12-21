@@ -1,5 +1,6 @@
 {
   "name": "cli",
+  "type": "module",
   "version": "1.0.0",
   "main": "cli.js",
   "scripts": {
@@ -10,7 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@inquirer/prompts": "^7.2.1",
+    "axios": "^1.7.9",
     "chalk": "^5.4.0",
     "commander": "^12.1.0"
   }

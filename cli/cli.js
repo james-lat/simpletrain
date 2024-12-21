@@ -1,43 +1,39 @@
-const { Command } = require('commander');
-const inquirer = require('@inquirer/prompts');
+import { Command } from 'commander';
+import readline from 'readline';
+import chalk from 'chalk';
+import axios from 'axios';
 const program = new Command();
 
 program
-    .command('greet <name>')
-    .description('Greet someone by name')
-    .action((name) => {
-        console.log(`Hello, ${name}!`);
+  .name('my-cli')
+  .description('A CLI that prompts for username and password')
+  .version('1.0.0');
+
+program
+  .command('login')
+  .description('Login with username and password')
+  .action(() => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
     });
 
-async function handleLogin() {
-    try {
-        const answers = await inquirer.prompt([
-          {
-            type: 'input',
-            name: 'username',
-            message: 'Enter your username:',
-          },
-          {
-            type: 'password',
-            name: 'password',
-            message: 'Enter your password:',
-          },
-        ]);
-    
-        console.log(`\nLogin Successful!`);
-        console.log(`Username: ${answers.username}`);
-        console.log('Password: [hidden for security]');
-      } catch (error) {
-        console.error('Error during login:', error.message);
-      }
-    }
-    
-    program
-      .command('login')
-      .description('Login with your username and password')
-      .action(() => {
-        handleLogin();
+    rl.question('Enter your username: ', (username) => {
+      rl.stdoutMuted = true;
+      rl.question('Enter your password: ', (password) => {
+        rl.close();
+        console.log(`\nUsername: ${username}`);
+        console.log('Password: [hidden]');
       });
-  
+
+      rl._writeToOutput = (string) => {
+        if (rl.stdoutMuted) {
+          rl.output.write('*');
+        } else {
+          rl.output.write(string);
+        }
+      };
+    });
+  });
 
 program.parse(process.argv);
