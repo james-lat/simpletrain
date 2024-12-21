@@ -20,3 +20,4 @@ def addUser(request):
 @api_view(['GET'])
 def getUser(request):
     return HttpResponse("Hello")
+
