@@ -8,8 +8,16 @@ from django.http import HttpResponse
 # Create your views here.
 @api_view(['POST'])
 def addUser(request):
-    print("sugma")
+    if request.method == 'POST':
+        data = request.data  
+        print("Received data:", data)  
+        return Response({"message": "Data received successfully!", "data": data}, status=200) 
+    
+    return Response({"error": "Method not allowed"}, status=405)
+
+
 
 @api_view(['GET'])
 def getUser(request):
-    return HttpResponse("Nick is gay")
+    return HttpResponse("Hello")
+
