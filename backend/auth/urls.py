@@ -16,12 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 app_name = 'login'
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('login.urls')),  # Ensure this is included
+    
+    path('', include('login.urls')),  
 ]
 
