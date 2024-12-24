@@ -1,0 +1,26 @@
+{
+    "templates": [
+      {
+        "id": 1,
+        "name": "node-app",
+        "baseImage": "node:16",
+        "dependencies": ["express", "dotenv"],
+        "entryPoint": "index.js"
+      },
+      {
+        "id": 2,
+        "name": "python-app",
+        "baseImage": "python:3.9",
+        "dependencies": ["flask", "requests"],
+        "entryPoint": "app.py"
+      },
+      {
+        "id": 3,
+        "name": "java-app",
+        "baseImage": "openjdk:17",
+        "dependencies": ["spring-boot"],
+        "entryPoint": "Main.java"
+      }
+    ]
+  }
+  
