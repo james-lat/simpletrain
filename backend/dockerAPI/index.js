@@ -16,7 +16,7 @@ app.post('/create-container', async (req, res) => {
   const containerOptions = {
     Image: requirements.imageName,
     name: containerName,
-    
+    cmd: requirements.commandLineArgs,
   };
   console.log(requirements.imageName); 
  pullImage(requirements.imageName)
@@ -26,6 +26,10 @@ app.post('/create-container', async (req, res) => {
     })
     .then((response) => { // Handle response from pullContainer
       res.status(response.status).send(response.message);
+    })
+    .then(() => { // Get container logs
+      const container = docker.getContainer(containerName);
+      getContainerLogs(container);
     })
     .catch((error) => { // Handle errors from either function
       console.error(error);
@@ -51,7 +55,7 @@ async function pullImage(imageName) {
     }
   } catch (error) {
     console.error("Error checking or pulling image:", error);
-    throw error; // Re-throw the error to be handled by the caller
+    throw error; 
   }
 }
 
@@ -72,6 +76,35 @@ async function pullContainer(containerOptions) {
   }
 }
 
+
+async function getContainerLogs(container) {
+  try {
+    const logStream = await container.logs({
+      follow: true,
+      stdout: true, 
+      stderr: true, 
+      timestamps: true,
+    });
+
+    logStream.on('data', (chunk) => {
+      console.log(chunk.toString()); // Process each log chunk
+      
+    });
+
+    logStream.on('error', (err) => {
+      console.error('Error getting container logs:', err);
+    
+    });
+
+    logStream.on('end', () => {
+      console.log('Log stream ended.');
+     
+    });
+  } catch (error) {
+    console.error("Error getting container logs:", error);
+    // Handle the error
+  }
+}
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
