@@ -1,5 +1,5 @@
 {
-    "imageName": "alpine:latest",
+    "imageName": "hello-world:latest",
     "commandLineArgs": ["--batch-size", "32", "--epochs", "100"],
     "environmentVariables": {
       "DATA_DIR": "/data/my_dataset"
