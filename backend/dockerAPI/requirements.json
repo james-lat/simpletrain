@@ -1,0 +1,13 @@
+{
+    "imageName": "alpine:latest",
+    "commandLineArgs": ["--batch-size", "32", "--epochs", "100"],
+    "environmentVariables": {
+      "DATA_DIR": "/data/my_dataset"
+    },
+      "portMappings": [
+          {
+              "hostPort": 8080,
+              "containerPort": 80
+          }
+      ]
+  }
