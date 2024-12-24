@@ -1,6 +1,6 @@
 {
     "imageName": "alpine:latest",
-    "commandLineArgs": ["echo", "hello simpletrain"],
+    "commandLineArgs": ["/bin/sh", "-c", "tail -f /dev/null & echo 'hello simpletrain'"],
     "environmentVariables": {
       "DATA_DIR": "/data/my_dataset"
     },
