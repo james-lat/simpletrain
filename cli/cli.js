@@ -37,4 +37,28 @@ program
     });
   });
 
+// run this locally using "json-server --watch dummy_data.json --port 3000"
+//   make sure json-server is installed using npm install -g json-server  
+program
+  .command('getTemplate <name/id>')
+  .description('get dummy template data using name or ID')
+  .action(async (nameOrID) => {
+    try {
+      const response = await axios.get('http://localhost:3000/templates');
+      const templates = response.data;
+      const template = templates.find(
+        (t) => t.name === nameOrId || t.id.toString() === nameOrId
+      );
+
+      if(!template){
+        console.log("Template not found")
+      }
+      else{
+        // send template to dockerAPI to turn into image
+      }
+
+
+    }
+  })
+
 program.parse(process.argv);
