@@ -16,7 +16,6 @@ app.post('/create-container', async (req, res) => {
   const containerOptions = {
     Image: requirements.imageName,
     name: containerName,
-    Cmd: commandLineArgs
     
   };
   console.log(requirements.imageName); 
@@ -35,13 +34,25 @@ app.post('/create-container', async (req, res) => {
 });
 
 async function pullImage(imageName) { 
-  const pullStream = await docker.pull(imageName);
-  return await new Promise((resolve, reject) => {
-    docker.modem.followProgress(pullStream, (err, res) => {
-        if (err) return reject(err);
-        resolve(res);
+  try { 
+    const images = await docker.listImages({ filters: { reference: [imageName] } });
+    if (images.length > 0) { 
+      console.log("Image already exists on remote host.");
+      return; 
+    } else { 
+      console.log(`Image ${imageName} not found on remote host. Pulling image...`);
+      const pullStream = await docker.pull(imageName);
+      return await new Promise((resolve, reject) => {
+        docker.modem.followProgress(pullStream, (err, res) => {
+            if (err) return reject(err);
+            resolve(res);
+        });
     });
-});
+    }
+  } catch (error) {
+    console.error("Error checking or pulling image:", error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
 }
 
 async function pullContainer(containerOptions) { 
