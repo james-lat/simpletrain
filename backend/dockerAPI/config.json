@@ -4,10 +4,15 @@
     "environmentVariables": {
       "DATA_DIR": "/data/my_dataset"
     },
+    "caPath": "C:\\docker-certs\\ca.pem",
+    "certPath": "C:\\docker-certs\\client-cert.pem", 
+    "keyPath": "C:\\docker-certs\\client-key.pem",
+    "serverIp": "192.168.40.164",
       "portMappings": [
           {
-              "hostPort": 8080,
+              "hostPort": 2376,
               "containerPort": 80
           }
       ]
+    
   }

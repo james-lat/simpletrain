@@ -2,9 +2,25 @@ const express = require('express');
 const app = express();
 const port = 3001;
 const Docker = require('dockerode');
-const requirements = require('./requirements.json');
+const fs = require('fs');
+const requirements = require('./config.json');
 // Configuration for connecting to the remote Docker daemon
-const docker = new Docker({ host: '192.168.40.162', port: 2375 }); 
+const ca = fs.readFileSync(requirements.caPath);
+const cert = fs.readFileSync(requirements.certPath);
+const key = fs.readFileSync(requirements.keyPath);
+const serverIp = requirements.serverIp;
+const serverPort = requirements.portMappings[0].hostPort;
+
+const docker = new Docker(
+  {
+     host: serverIp, 
+     port: serverPort,
+     ca: ca,
+     cert: cert,
+     key: key,
+     protocol: 'https',
+    }
+); 
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
