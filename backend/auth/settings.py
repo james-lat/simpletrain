@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'login',
     'rest_framework',
     'rest_framework_simplejwt',
+    "django_extensions",
 ]
 
 from datetime import timedelta # import this library top of the settings.py file
