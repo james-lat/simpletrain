@@ -16,11 +16,28 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
         // - command (string): The command to run in the container.
         // - resources (object): Resource requests and limits (CPU, memory, GPU).
         // - ports (array): Array of port mappings.
+        const service = {
+            apiVersion: "v1",
+            kind: "Service",
+            metadata: {
+                name: `${deploymentName}-service`
+            },
+            spec: {
+                selector: {
+                    app: "training"
+                },
+                ports: ports.map(port => ({
+                    protocol: "TCP",
+                    port: port.containerPort,
+                    targetPort: port.containerPort
+                }))
+            }
+        }
         ingressSpec = {
             apiVersions: 'networking.k8s.io/v1',
             kind: 'Ingress',
             metadata: {
-                name: `production-custom-${clientIdentifier}`,
+                name: `${deploymentName}-ingress`,
                 labels: {
                     createdBy: 'node-client',
                 },
@@ -32,7 +49,7 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
                 ingressClassName: 'nginx',
                 rules: [
                     {
-                        host: `${clientIdentifier}`,
+                        host: `${deploymentName}.example.com`,
                         http: {
                             paths: [
                                 {
@@ -40,11 +57,11 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
                                         service: {
                                             name: 'production-auto-deploy',
                                             port: {
-                                                number: 5000,
+                                                number: ports[0].containerPort,
                                             },
                                         },
                                     },
-                                    path: '/default-kuberiq(/|$)(.*)',
+                                    path: '/',
                                     pathType: 'ImplementationSpecific',
                                 },
                             ],
@@ -92,15 +109,14 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
                     }
                 }
             }
-        const createIngressRes = k8sApi.createNamespacedIngress(namespace, ingressSpec)
-        .then((response) => {
-            console.log('Ingress created:', response.body);
-        }) 
-        k8sApi.createNamespacedDeployment(namespace, deploymentSpec)
-        .then((response) => {
-            console.log('Deployment created:', response.body);
-        })
-        
+        try { 
+            await k8sApi.createNamespacedDeployment(namespace, deploymentSpec)
+            await k8sCoreApi.createNamespacedService(namespace, service)
+            await k8sNetworkingApi.createNamespacedIngress(namespace, ingressSpec) 
+        } catch (error) {
+            console.error("error creating deployment", error)
+            throw error
+        }
     } catch (error) {
         console.error("error creating deployment", error)
         throw error
@@ -109,20 +125,13 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
 
 async function deleteTrainingDeployment(deploymentName) {
     try {
-        //deleting deployment 
-        try { 
-            await k8sApi.deleteNamespacedDeployment(deploymentName, namespace); 
-            console.log('Deleting deployment: ' + deploymentName);
-        } catch (error) {
-            console.error("error deleting deployment", error)
-            throw error
-        }
-        // Deletes a Kubernetes Deployment, Service and Ingress.
-        // Parameters:
-        // - deploymentName (string): The name of the deployment to delete.
+        await k8sApi.deleteNamespacedDeployment(deploymentName, namespace);
+        await k8sCoreApi.deleteNamespacedService(deploymentName, namespace);
+        await k8sNetworkingApi.deleteNamespacedIngress(deploymentName, namespace);
+        console.log(`Deleted deployment resources for: ${deploymentName}`);
     } catch (error) {
-        console.error("error deleting deployment", error)
-        throw error
+        console.error("Error deleting deployment resources:", error);
+        throw error;
     }
 }
 
@@ -139,13 +148,11 @@ async function getDeploymentLogs(deploymentName) {
 
 async function listDeployments() {
     try {
-        // Gets all deployments in the namespace
-        k8sApi.listNamespacedPod('default').then((res) => {
-            console.log(res.body);
-        });
+        const deployments = await k8sApi.listNamespacedDeployment(namespace);
+        return deployments.body.items;
     } catch (error) {
-        console.error("error getting deployments", error)
-        throw error
+        console.error("Error listing deployments:", error);
+        throw error;
     }
 }
 
