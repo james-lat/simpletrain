@@ -6,6 +6,8 @@ const requirements = require('./requirements.json');
 // Configuration for connecting to the remote Docker daemon
 const docker = new Docker({ host: '192.168.40.162', port: 2375 }); 
 
+app.use(express.json())
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
@@ -13,15 +15,19 @@ app.get('/', (req, res) => {
 app.post('/create-container', async (req, res) => {
   const containerName = `simple-train-container-${Date.now()}`;
 
+  console.log("printing req")
+  console.log(req.body)
+
   const containerOptions = {
-    Image: requirements.imageName,
-    name: containerName,
-    cmd: requirements.commandLineArgs,
+    Image: req.body.baseImage,
+    name: req.body.name,
+    cmd: req.body.cmd,
+    dependencies: req.body.dependencies
   };
-  console.log(requirements.imageName); 
- pullImage(requirements.imageName)
+  
+  pullImage(req.imageName)
     .then(() => {
-        console.log(`Image ${requirements.imageName} pulled successfully on remote host.`);
+        console.log(`Image ${req.body.name} pulled successfully on remote host.`);
         return pullContainer(containerOptions);
     })
     .then((response) => { // Handle response from pullContainer

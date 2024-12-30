@@ -11,8 +11,7 @@
         "id": 2,
         "name": "python-app",
         "baseImage": "python:3.9",
-        "dependencies": ["flask", "requests"],
-        "entryPoint": "app.py"
+        "cmd": ["python", "app.py"]
       },
       {
         "id": 3,
