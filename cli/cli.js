@@ -37,12 +37,12 @@ program
     });
   });
 
-// run this locally using "json-server --watch dummy_data.json --port 3000"
+// run this locally using " npx json-server --watch dummy_data.json --port 3000"
 //   make sure json-server is installed using npm install -g json-server  
 program
   .command('getTemplate <name/id>')
   .description('get dummy template data using name or ID')
-  .action(async (nameOrID) => {
+  .action(async (nameOrId) => {
     try {
       const response = await axios.get('http://localhost:3000/templates');
       const templates = response.data;
@@ -54,10 +54,23 @@ program
         console.log("Template not found")
       }
       else{
+        console.log("template found")
         // send template to dockerAPI to turn into image
+        try {
+          console.log("trying create container")
+          const response = await axios.post('http://localhost:3001/create-container', template);
+          console.log("repsonse from post request: \n")
+          console.log(response.data.message)
+        }
+        catch (error){
+          console.log('Error: 1')
+          console.log(error.response?.data || error.message)
+        }
       }
-
-
+    }
+    catch (error){
+      console.log('Error: 2')
+      console.log(error)
     }
   })
 
