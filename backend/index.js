@@ -1,20 +1,24 @@
-import express from 'express'; // Import Express.js
-import jobsRoutes from './routes/jobs.mjs'; // Import job routes
+// index.mjs
+import express from 'express';
+import jobRoutes from './routes/jobs.mjs';
+import { initializeK8sClient } from './kubernetes/client.mjs';
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = 3001;
 
-app.use(express.json()); // Enable JSON body parsing
+app.use(express.json());
+app.use('/api/jobs', jobRoutes);
 
-// Mount routes
-app.use('/api/jobs', jobsRoutes);
+async function startServer() {
+    try {
+        await initializeK8sClient(); // VERY IMPORTANT: Await the initialization
+        app.listen(port, () => {
+            console.log(`Server listening on port ${port}`);
+        });
+    } catch (error) {
+        console.error("Failed to start server:", error);
+        process.exit(1); // Exit the process if initialization fails
+    }
+}
 
-// Basic error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-});
-
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-});
+startServer();

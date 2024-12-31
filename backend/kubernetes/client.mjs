@@ -1,11 +1,24 @@
 import * as k8s from '@kubernetes/client-node';
 
-const kc = new k8s.KubeConfig();
-kc.loadFromDefault();
+let k8sApi;  // Declare k8sApi here
+let k8sCoreApi;
+let k8sNetworkingApi;
 
-const k8sApi = kc.makeApiClient(k8s.AppsV1Api);
-const k8sCoreApi = kc.makeApiClient(k8s.CoreV1Api)
-const k8sNetworkingApi = kc.makeApiClient(k8s.NetworkingV1Api)
+async function initializeK8sClient() {
+    try {
+        const kc = new k8s.KubeConfig();
+        const kubeconfigPath = "C:\\MACBOOK_KUBECONFIG\\config"; //temporarily hardocing path to kubeconfig file. 
+        kc.loadFromFile(kubeconfigPath); // will be replaced by loadfromdefault(). 
+        console.log(`Kubeconfig loaded from: ${kc.currentContext}`); // Log the path
+        k8sApi = kc.makeApiClient(k8s.AppsV1Api);
+        k8sCoreApi = kc.makeApiClient(k8s.CoreV1Api);
+        k8sNetworkingApi = kc.makeApiClient(k8s.NetworkingV1Api);
+        console.log("Kubernetes client initialized successfully.");
+    } catch (error) {
+        console.error("Error initializing Kubernetes client:", error);
+        process.exit(1); // Crucial: Exit if initialization fails
+    }
+}
 const namespace = 'default';
 async function createTrainingDeployment(deploymentName, imageName, command, resources, ports) {
     try {
@@ -123,7 +136,7 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
     }
 }
 
-async function deleteTrainingDeployment(deploymentName) {
+async function deleteTrainingDeployment(deploymentName, namespace) {
     try {
         await k8sApi.deleteNamespacedDeployment(deploymentName, namespace);
         await k8sCoreApi.deleteNamespacedService(deploymentName, namespace);
@@ -147,8 +160,10 @@ async function getDeploymentLogs(deploymentName) {
 }
 
 async function listDeployments() {
+    console.log('**** Inside listDeployments() ****');
+    console.log('k8sApi.listNamespacedDeployment is:', k8sApi.listNamespacedDeployment?.toString());
     try {
-        const deployments = await k8sApi.listNamespacedDeployment(namespace);
+        const deployments = await k8sApi.listNamespacedDeployment({ namespace: 'default' });
         return deployments.body.items;
     } catch (error) {
         console.error("Error listing deployments:", error);
@@ -156,4 +171,4 @@ async function listDeployments() {
     }
 }
 
-export { createTrainingDeployment, deleteTrainingDeployment, getDeploymentLogs, listDeployments };
+export {initializeK8sClient, createTrainingDeployment, deleteTrainingDeployment, getDeploymentLogs, listDeployments };
