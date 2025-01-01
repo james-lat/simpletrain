@@ -5,7 +5,13 @@ const router = express.Router();
 router.post('/', async (req, res) => {
     try {
         // Extracts: deploymentName, imageName, command, resources, ports from req.body
+        const { deploymentName, imageName, command, resources, ports } = req.body;
+        if (!deploymentName || !imageName || !command || !resources || !ports) {
+            return res.status(400).json({ message: "Missing required deployment details" });
+        }
         // Calls: k8sClient.createTrainingDeployment()
+        const deployment = await createTrainingDeployment(deploymentName, imageName, command, resources, ports);
+        res.status(201).json({ message: "Deployment created successfully", deployment });
         // Returns: 201 Created on success, 500 Internal Server Error on failure
     } catch (error) {
         console.error("error creating training job", error)

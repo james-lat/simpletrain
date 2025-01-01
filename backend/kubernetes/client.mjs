@@ -20,7 +20,7 @@ async function initializeK8sClient() {
     }
 }
 const namespace = 'default';
-async function createTrainingDeployment(deploymentName, imageName, command, resources, ports) {
+async function createTrainingDeployment(deploymentName, imageName, command, resources, ports, namespace = 'default') {
     try {
         // Creates a Kubernetes Deployment, Service and Ingress
         // Parameters:
@@ -29,7 +29,7 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
         // - command (string): The command to run in the container.
         // - resources (object): Resource requests and limits (CPU, memory, GPU).
         // - ports (array): Array of port mappings.
-        const service = {
+        const serviceSpec = {
             apiVersion: "v1",
             kind: "Service",
             metadata: {
@@ -46,8 +46,8 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
                 }))
             }
         }
-        ingressSpec = {
-            apiVersions: 'networking.k8s.io/v1',
+        const ingressSpec = {
+            apiVersion: 'networking.k8s.io/v1',
             kind: 'Ingress',
             metadata: {
                 name: `${deploymentName}-ingress`,
@@ -55,7 +55,7 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
                     createdBy: 'node-client',
                 },
                 annotations: {
-                    'meta.helm.sh/release-namespace': 'production-auto-deploy',
+                    'meta.helm.sh/release-namespace': 'production-auto-deploy', // Keep or remove as needed
                 },
             },
             spec: {
@@ -66,29 +66,25 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
                         http: {
                             paths: [
                                 {
+                                    path: '/',
+                                    pathType: 'ImplementationSpecific',
                                     backend: {
                                         service: {
-                                            name: 'production-auto-deploy',
+                                            name: `${deploymentName}-service`,
                                             port: {
                                                 number: ports[0].containerPort,
                                             },
                                         },
                                     },
-                                    path: '/',
-                                    pathType: 'ImplementationSpecific',
                                 },
                             ],
                         },
                     },
                 ],
-                tls: [
-                    {
-                        hosts: [`${clientIdentifier}.example.com`],
-                    },
-                ],
-            }
-        }
-        deploymentSpec = 
+                // REMOVE THE ENTIRE TLS SECTION
+            },
+        };
+        const deploymentSpec = 
             {
                 apiVersion: 'apps/v1',
                 kind: 'Deployment',
@@ -123,9 +119,12 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
                 }
             }
         try { 
-            await k8sApi.createNamespacedDeployment(namespace, deploymentSpec)
-            await k8sCoreApi.createNamespacedService(namespace, service)
-            await k8sNetworkingApi.createNamespacedIngress(namespace, ingressSpec) 
+            await k8sApi.createNamespacedDeployment({namespace: namespace, body: deploymentSpec})
+            console.log(`Deployment created: ${deploymentName}`)
+            await k8sCoreApi.createNamespacedService({namespace: namespace, body: serviceSpec})
+            console.log(`Service created: ${deploymentName}-service`)
+            await k8sNetworkingApi.createNamespacedIngress({namespace: namespace, body: ingressSpec}) 
+            console.log(`Ingress created: ${deploymentName}-ingress`)
         } catch (error) {
             console.error("error creating deployment", error)
             throw error
@@ -159,10 +158,10 @@ async function getDeploymentLogs(deploymentName) {
     }
 }
 
-async function listDeployments() {
+async function listDeployments(namespace) {
     console.log('**** Inside listDeployments() ****');
     try {
-        const deployments = await k8sApi.listNamespacedDeployment({ namespace: 'default' });
+        const deployments = await k8sApi.listNamespacedDeployment({ namespace: namespace });
         console.log("Raw API Response:", JSON.stringify(deployments, null, 2)); // Log the raw response
         return deployments.body.items;
     } catch (error) {
