@@ -138,9 +138,9 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
 
 async function deleteTrainingDeployment(deploymentName, namespace) {
     try {
-        await k8sApi.deleteNamespacedDeployment(deploymentName, namespace);
-        await k8sCoreApi.deleteNamespacedService(deploymentName, namespace);
-        await k8sNetworkingApi.deleteNamespacedIngress(deploymentName, namespace);
+        await k8sApi.deleteNamespacedDeployment({name: deploymentName, namespace: namespace });
+        //await k8sCoreApi.deleteNamespacedService(deploymentName, namespace);
+        //await k8sNetworkingApi.deleteNamespacedIngress(deploymentName, namespace);
         console.log(`Deleted deployment resources for: ${deploymentName}`);
     } catch (error) {
         console.error("Error deleting deployment resources:", error);
@@ -161,9 +161,9 @@ async function getDeploymentLogs(deploymentName) {
 
 async function listDeployments() {
     console.log('**** Inside listDeployments() ****');
-    console.log('k8sApi.listNamespacedDeployment is:', k8sApi.listNamespacedDeployment?.toString());
     try {
         const deployments = await k8sApi.listNamespacedDeployment({ namespace: 'default' });
+        console.log("Raw API Response:", JSON.stringify(deployments, null, 2)); // Log the raw response
         return deployments.body.items;
     } catch (error) {
         console.error("Error listing deployments:", error);

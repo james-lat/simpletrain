@@ -19,8 +19,9 @@ router.delete('/:deploymentName', async (req, res) => {
         // Extracts: deploymentName from req.params
         // Calls: k8sClient.deleteTrainingDeployment()
         const deploymentName = req.params.deploymentName; 
-        console.log(`Deleting deployment: ${deploymentName}`);
-        const Logs = await deleteTrainingDeployment(deploymentName); 
+        const namespace = req.query.namespace || 'default';
+        console.log(`Deleting deployment: ${deploymentName} in namespace: ${namespace}`);
+        await deleteTrainingDeployment(deploymentName, namespace); 
         res.status(200).json("Successfully deleted Deployment:" + deploymentName)
        console.log("Successfully deleted Deployment:" + deploymentName)
       
@@ -36,10 +37,11 @@ router.get('/:deploymentName/logs', async (req, res) => {
         // Extracts: deploymentName from req.params
         // Calls: k8sClient.getDeploymentLogs()
         const deploymentName = req.params.deploymentName; 
-        console.log(`Getting logs for deployment: ${deploymentName}`);
-        const Logs = await getDeploymentLogs(deploymentName); 
+        // gets namespace from url query parameter. 
+        const namespace = req.query.namespace || 'default';
+        console.log(`Getting logs for deployment: ${deploymentName} in namespcae: ${namespace}`);
+        const Logs = await getDeploymentLogs(deploymentName, namespace); 
         res.status(200).json("logs:" + Logs)
-        res.send("deployment logs:" + Logs); 
         console.log("deployment logs:" + Logs)
         // Returns: 200 OK with logs on success, 500 Internal Server Error on failure
     } catch (error) {
