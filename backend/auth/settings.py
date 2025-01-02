@@ -56,7 +56,10 @@ OAUTH2_PROVIDER = {
 
 AUTH_USER_MODEL = "login.User" 
     "django_extensions",
+    'oauth2_provider'
 ]
+
+AUTH_USER_MODEL = "login.User" 
 
 from datetime import timedelta # import this library top of the settings.py file
 
