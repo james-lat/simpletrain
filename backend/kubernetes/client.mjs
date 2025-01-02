@@ -19,7 +19,7 @@ async function initializeK8sClient() {
         process.exit(1); // Crucial: Exit if initialization fails
     }
 }
-const namespace = 'default';
+
 async function createTrainingDeployment(deploymentName, imageName, command, resources, ports, namespace = 'default') {
     try {
         // Creates a Kubernetes Deployment, Service and Ingress
@@ -147,7 +147,7 @@ async function deleteTrainingDeployment(deploymentName, namespace) {
     }
 }
 
-async function getDeploymentLogs(deploymentName) {
+async function getDeploymentLogs(deploymentName, namespace) {
     try {
         // Gets logs from the pods of a deployment
         // Parameters:

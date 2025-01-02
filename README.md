@@ -55,13 +55,36 @@ The backend component is the current focus, alongside foundational work on Djang
 * **Kubernetes Interaction:** `@kubernetes/client-node`
 * **Authentication and Data Modeling:** Django (using its built-in database for now)
 * **Containerization:** Docker (for backend and training images)
-* **CLI (Future):** JavaScript (Commander.js, readline, chalk, axios)
+* **CLI:** JavaScript (Commander.js, readline, chalk, axios)
 
 ---
 
 ## File Structure:
-<Include details here, if available.>
+## File Structure
 
+| File/Folder | Description |
+|---|---|
+| `backend/` | Contains the backend code. |
+| `backend/express` | Contains the express server code. |
+| `backend/express/index.js` | The main entry point for the Express.js server. This file: <br> - Initializes the Express app. <br> - Sets up middleware (e.g., JSON parsing, CORS). <br> - Defines and mounts API routes. <br> - Starts the server and listens for incoming requests. |
+| `backend/kubernetes/` | Contains Kubernetes-related code. |
+| `backend/kubernetes/client.mjs` | Contains the logic for interacting with the Kubernetes API using `@kubernetes/client-node`. This module defines functions to: <br> - Create Deployments, Services, and Ingresses based on dynamic configurations received from API requests. <br> - Delete Deployments, Services, and Ingresses. <br> - Retrieve logs from Pods. <br> - List Deployments and other Kubernetes resources. |
+| `backend/kubernetes/manifests/` | Contains Javascript files that hold the specifications for kubernetes deployments. |
+| `backend/kubernetes/manifests/deployment.js` | Javascript file containing the deployment spec. |
+| `backend/kubernetes/manifests/service.js` | Javascript file containing the service spec. |
+| `backend/kubernetes/manifests/ingress.js` | Javascript file containing the ingress spec. |
+| `backend/routes/` | Contains API route definitions. |
+| `backend/routes/jobs.mjs` | Defines API routes for managing training jobs: <br> - `POST /api/jobs`: Creates a new training job (Deployment, Service, Ingress). <br> - `DELETE /api/jobs/:deploymentName`: Deletes a training job. <br> - `GET /api/jobs/:deploymentName/logs`: Retrieves logs for a training job. |
+| `backend/middleware/` | Contains middleware functions. |
+| `backend/middleware/auth.js` | Authentication middleware that verifies JWT tokens issued by the Django authentication system. |
+| `backend/auth` | Contains django authentication files |     
+| `backend/login` | Contains login files | 
+| `backend/.env` | Contains environment variables for the backend (e.g., port, Django URL, etc.). |
+| `backend/manage.py` | to be filled out |
+| `cli/` | contains the command line interface functions |
+| `cli/cli.js` | to be filled out |
+| `frontend/` (Optional) | Contains the frontend code |
+| `README.md` | The project's README file (this file). |
 ---
 
 ## Backend Implementation Details:
