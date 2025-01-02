@@ -157,7 +157,6 @@ async function getDeploymentLogs(deploymentName) {
         throw error
     }
 }
-
 async function listDeployments(namespace) {
     console.log('**** Inside listDeployments() ****');
     try {

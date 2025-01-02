@@ -1,7 +1,7 @@
 // index.mjs
 import express from 'express';
-import jobRoutes from './routes/jobs.mjs';
-import { initializeK8sClient } from './kubernetes/client.mjs';
+import jobRoutes from '../routes/jobs.mjs';
+import { initializeK8sClient } from '../kubernetes/client.mjs';
 
 const app = express();
 const port = 3001;

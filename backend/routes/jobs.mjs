@@ -59,8 +59,9 @@ router.get('/:deploymentName/logs', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         // Calls: k8sClient.listDeployments()
+        const namespace = req.query.namespace || 'default';
         console.log("Getting all deployments...")
-        allDeployments = await listDeployments();
+        allDeployments = await listDeployments(namespace);
         res.status(200).json({ deployments: allDeployments });
         console.log("Deployments: " + allDeployments);
         // Returns: 200 OK with all deployments on success, 500 Internal Server Error on failure
