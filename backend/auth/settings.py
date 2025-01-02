@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +29,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+load_dotenv()
+
+OIDC_RSA_PRIVATE_KEY = os.getenv('OIDC_RSA_PRIVATE_KEY')
+
 
 # Application definition
 
@@ -40,8 +46,26 @@ INSTALLED_APPS = [
     'login',
     'rest_framework',
     'rest_framework_simplejwt',
-    "django_extensions",
+    'oauth2_provider',
+    'django_extensions'
 ]
+
+OAUTH2_PROVIDER = {
+    "OIDC_ENABLED": True,
+    "OIDC_RSA_PRIVATE_KEY": os.environ.get("OIDC_RSA_PRIVATE_KEY"),
+    "SCOPES": {
+        "openid": "OpenID Connect scope",
+        # ... any other scopes that you use
+    },
+    # ... any other settings you want
+}
+
+# AUTH_USER_MODEL = ["login.User",
+# "django_extensions",
+# 'oauth2_provider'
+# ]
+
+AUTH_USER_MODEL = 'login.User'
 
 from datetime import timedelta # import this library top of the settings.py file
 
@@ -91,6 +115,8 @@ TEMPLATES = [
     },
 ]
 
+# AUTH_USER_MODEL = 'login.User'
+
 WSGI_APPLICATION = 'auth.wsgi.application'
 
 
@@ -122,6 +148,19 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+
+OAUTH2_PROVIDER = {
+    "OIDC_ENABLED": True,
+    "OIDC_RSA_PRIVATE_KEY": os.environ.get("OIDC_RSA_PRIVATE_KEY"),
+    "SCOPES": {
+        "openid": "OpenID Connect scope",
+    },
+    
+}
+
+LOGIN_URL = '/admin/login/'
 
 
 # Internationalization
