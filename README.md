@@ -69,10 +69,6 @@ The backend component is the current focus, alongside foundational work on Djang
 | `backend/express/index.js` | The main entry point for the Express.js server. This file: <br> - Initializes the Express app. <br> - Sets up middleware (e.g., JSON parsing, CORS). <br> - Defines and mounts API routes. <br> - Starts the server and listens for incoming requests. |
 | `backend/kubernetes/` | Contains Kubernetes-related code. |
 | `backend/kubernetes/client.mjs` | Contains the logic for interacting with the Kubernetes API using `@kubernetes/client-node`. This module defines functions to: <br> - Create Deployments, Services, and Ingresses based on dynamic configurations received from API requests. <br> - Delete Deployments, Services, and Ingresses. <br> - Retrieve logs from Pods. <br> - List Deployments and other Kubernetes resources. |
-| `backend/kubernetes/manifests/` | Contains Javascript files that hold the specifications for kubernetes deployments. |
-| `backend/kubernetes/manifests/deployment.js` | Javascript file containing the deployment spec. |
-| `backend/kubernetes/manifests/service.js` | Javascript file containing the service spec. |
-| `backend/kubernetes/manifests/ingress.js` | Javascript file containing the ingress spec. |
 | `backend/routes/` | Contains API route definitions. |
 | `backend/routes/jobs.mjs` | Defines API routes for managing training jobs: <br> - `POST /api/jobs`: Creates a new training job (Deployment, Service, Ingress). <br> - `DELETE /api/jobs/:deploymentName`: Deletes a training job. <br> - `GET /api/jobs/:deploymentName/logs`: Retrieves logs for a training job. |
 | `backend/middleware/` | Contains middleware functions. |
