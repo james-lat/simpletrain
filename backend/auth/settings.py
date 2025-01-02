@@ -40,7 +40,10 @@ INSTALLED_APPS = [
     'login',
     'rest_framework',
     'rest_framework_simplejwt',
+    'oauth2_provider'
 ]
+
+AUTH_USER_MODEL = "login.User" 
 
 from datetime import timedelta # import this library top of the settings.py file
 
@@ -89,6 +92,8 @@ TEMPLATES = [
         },
     },
 ]
+
+# AUTH_USER_MODEL = 'login.User'
 
 WSGI_APPLICATION = 'auth.wsgi.application'
 
