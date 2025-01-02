@@ -121,13 +121,22 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
         try { 
             await k8sApi.createNamespacedDeployment({namespace: namespace, body: deploymentSpec})
             console.log(`Deployment created: ${deploymentName}`)
+            deploymentCreated = true;
+         } catch (deploymentError) {
+            console.error("error creating deployment", error)
+            throw deploymentError
+        } try { 
             await k8sCoreApi.createNamespacedService({namespace: namespace, body: serviceSpec})
             console.log(`Service created: ${deploymentName}-service`)
+        } catch (serviceError) {
+            console.error("error creating service", error)
+            throw serviceError
+        } try {
             await k8sNetworkingApi.createNamespacedIngress({namespace: namespace, body: ingressSpec}) 
             console.log(`Ingress created: ${deploymentName}-ingress`)
-        } catch (error) {
-            console.error("error creating deployment", error)
-            throw error
+        } catch (ingressError) {
+            console.error("error creating ingress", error)
+            throw ingressError
         }
     } catch (error) {
         console.error("error creating deployment", error)
