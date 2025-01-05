@@ -81,7 +81,7 @@ async function createTrainingDeployment(deploymentName, imageName, command, reso
                         },
                     },
                 ],
-                // REMOVE THE ENTIRE TLS SECTION
+                //TLS SECTION GOES HERE
             },
         };
         const deploymentSpec = 
@@ -206,4 +206,18 @@ async function listDeployments(namespace) {
     }
 }
 
-export {initializeK8sClient, createTrainingDeployment, deleteTrainingDeployment, getDeploymentLogs, listDeployments };
+async function deploymentInfo(deploymentName, namespace) {
+    try {
+        const deploymentDetails = await k8sApi.readNamespacedDeployment({
+            name: deploymentName, 
+            namespace: namespace
+        }); 
+        console.log("Deployment details:", JSON.stringify(deploymentDetails, null, 2)); // Log the raw response
+        return deploymentDetails.body;
+    } catch (error) {
+        console.error("Error reading deployment:", error);
+        throw error;
+    }
+}
+
+export {initializeK8sClient, createTrainingDeployment, deleteTrainingDeployment, getDeploymentLogs, listDeployments, deploymentInfo};
