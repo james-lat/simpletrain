@@ -45,3 +45,7 @@ class Token(APIView):
         }
 
         return Response(content)
+    
+def sample_view(request):
+    current_user = request.user
+    print(current_user.id)
