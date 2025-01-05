@@ -1,0 +1,2 @@
+To connect client.mjs to client server it requires access to the clients kubeconfig file. 
+Then you need to establish an ssh connection use: ssh -L 6443:127.0.0.1:55476 sammydabbas@192.168.40.126

@@ -158,12 +158,40 @@ async function deleteTrainingDeployment(deploymentName, namespace) {
 
 async function getDeploymentLogs(deploymentName, namespace) {
     try {
-        // Gets logs from the pods of a deployment
-        // Parameters:
-        // - deploymentName (string): The name of the deployment to get logs from
+        // 1. Get the Pods associated with the Deployment
+        const podList = await k8sCoreApi.listNamespacedPod({
+            namespace: 'default',
+            labelSelector: `app=${deploymentName}`,
+          });
+          
+
+        if (podList.body.items.length === 0) {
+            console.log(`No pods found for deployment ${deploymentName} in namespace ${'default'}`);
+            return []; // Or throw an error if you prefer
+        }
+
+        const logs = [];
+
+        // 2. Get logs from each Pod
+        for (const pod of podList.body.items) {
+            const podName = pod.metadata.name;
+            try {
+                const logResponse = await k8sCoreApi.readNamespacedPodLog({
+                    name: podName,
+                    namespace: 'default',
+                  });
+                  
+                logs.push({ podName, log: logResponse.body });
+            } catch (logError) {
+                console.error(`Error getting logs for pod ${podName}:`, logError);
+                logs.push({ podName, log: `Error retrieving logs: ${logError.message}` }); // Include error message in logs
+            }
+        }
+
+        return logs;
     } catch (error) {
-        console.error("error getting logs", error)
-        throw error
+        console.error("Error getting deployment logs:", error);
+        throw error;
     }
 }
 async function listDeployments(namespace) {
