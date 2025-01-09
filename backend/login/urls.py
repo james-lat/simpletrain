@@ -8,6 +8,7 @@ urlpatterns = [
     path('addUser/', views.addUser, name='addUser'),
     path('getUser/', views.getUser, name='getUser'),
     path('api/token/', Token.as_view(), name='token'),
+    path('api/create-deployment/', views.create_deployment, name='create_deployment'),
 
 
 ]
