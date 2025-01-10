@@ -1,0 +1,14 @@
+body {
+    background-color: #f0f0f0;
+  }
+  
+  .container {
+    margin-top: 50px;
+  }
+  
+  #login-page, #register-page {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }

@@ -1,90 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
-  <script type="module" src="https://unpkg.com/petite-vue?module"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      background-color: #f9f9f9;
-    }
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 20px;
-      background: #fff;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-    }
-    h1 {
-      font-size: 1.5em;
-      margin-bottom: 10px;
-    }
-    p {
-      color: #666;
-      font-size: 0.9em;
-    }
-    button {
-      background-color: #4285f4;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-top: 20px;
-    }
-    button:hover {
-      background-color: #357ae8;
-    }
-    .loader {
-      display: none;
-      margin: 20px auto;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #4285f4;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-    }
-    .loader.show {
-      display: block;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    a {
-      display: block;
-      margin-top: 10px;
-      font-size: 0.8em;
-      color: #4285f4;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login/Register Page</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container" v-scope="{ 
-    message: 'Sign in with your account to continue',
-    loading: false,
-    oauthLogin() {
-      this.loading = true;
-      setTimeout(() => { 
-        alert('Redirecting to OAuth provider...'); 
-        this.loading = false;
-      }, 1000); // Simulated delay for testing
-    }
-  }">
-    <h1>Login</h1>
-    <!-- <p>{{ message }}</p> -->
-    <button @click="oauthLogin">Login with OAuth</button>
-    <div :class="{ loader: true, show: loading }"></div>
-    <a href="#">you will login here chatgpt made this idk Ill change it later</a>
-  </div>
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-md-4">
+				<div id="login-page">
+					<div class="text-center"><h2>SimpleTrain</h2></div>
+					<form id="login-form">
+						<div class="form-group">
+							<label for="username">Username:</label>
+							<input type="text" class="form-control" id="username" required>
+						</div>
+						<div class="form-group">
+							<label for="password">Password:</label>
+							<input type="password" class="form-control" id="password" required>
+						</div>
+						<button type="submit" class="btn btn-primary">Login</button>
+					</form>
+					<p>Don't have an account? <a href="#" id="register-link">Register now</a></p>
+				</div>
+				<div id="register-page" style="display: none;">
+					<div class="text-center"><h2>SimpleTrain</h2></div>
+					<form id="register-form">
+						<div class="form-group">
+							<label for="register-username">Username:</label>
+							<input type="text" class="form-control" id="register-username" required>
+						</div>
+						<div class="form-group">
+							<label for="register-email">Email:</label>
+							<input type="email" class="form-control" id="register-email" required>
+						</div>
+						<div class="form-group">
+							<label for="register-password">Password:</label>
+							<input type="password" class="form-control" id="register-password" required>
+						</div>
+						<div class="form-group">
+							<label for="register-confirm-password">Retype Password:</label>
+							<input type="password" class="form-control" id="register-confirm-password" required>
+							<span id="password-match-error" style="display: none; color: red;">Passwords do not match</span>
+						</div>
+						<button type="submit" class="btn btn-primary">Register</button>
+					</form>
+					<p>Have an account? <a href="#" id="login-link">Log in</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<script src="app.js"></script>
 </body>
 </html>
