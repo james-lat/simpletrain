@@ -23,15 +23,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib import admin
 from django.urls import include, path
-from oauth2_provider import urls as oauth2_urls
+# from oauth2_provider import urls as oauth2_urls
 
 app_name = 'login'
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('o/', include(oauth2_urls)),
-    path('', include('login.urls')),  
-    path('accounts/', include('allauth.urls'))
+    # path('o/', include(oauth2_urls)),
+    path('accounts/', include('allauth.urls')),
+    path('', include('login.urls')),
+
 ]
 

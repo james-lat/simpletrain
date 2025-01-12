@@ -10,9 +10,19 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken  # <-- Add this import
 from django.contrib.auth.models import User  # <-- Import User model
+from django.shortcuts import render, redirect
+
 
 
 # Create your views here.
+
+def home(request):
+    return(render(request, "home.html"))
+
+def logout_view(request):
+    logout_view(request)
+    return()
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def addUser(request):
