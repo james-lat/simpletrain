@@ -23,10 +23,10 @@
 							<input type="password" class="form-control" id="password" required>
 						</div>
 						<button type="submit" class="btn btn-primary">Login</button>
-						<button id="google-signin" class="btn btn-light">
+						<a href="{% provider_login_url 'google' %}?next=/" id="google-signin" class="btn btn-light">
 							<img src="google.png" alt="Google Logo" class="google-logo">
 							Sign in with Google
-						</button>						
+						</a>						
 					</form>
 					<p>Don't have an account? <a href="#" id="register-link">Register now</a></p>
 				</div>
