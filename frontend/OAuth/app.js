@@ -45,11 +45,8 @@ document.getElementById('register-link').addEventListener('click', (e) => {
 		document.getElementById('login-page').style.display = 'block';
 	});
 
-	function onSignIn(googleUser) {
-		var profile = googleUser.getBasicProfile();
-		console.log('ID: ' + profile.getId());
-		console.log('Name: ' + profile.getName());
-		console.log('Image URL: ' + profile.getImageUrl());
-		console.log('Email: ' + profile.getEmail());
-		// Your authentication logic here
-	}
+	document.getElementById('google-signin').addEventListener('click', () => {
+		// Add your authentication logic here
+		alert('Google Sign-In Clicked'); // Placeholder for actual Google Sign-In logic
+	});
+	
