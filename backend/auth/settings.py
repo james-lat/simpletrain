@@ -46,6 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 ]
 
+ACCOUNT_ADAPTER = 'myapp.adapters.NoSignupAdapter'
+SOCIALACCOUNT_ADAPTER = 'myapp.adapters.RestrictedSocialAccountAdapter'
+
+
 # Commented out OAuth toolkit configuration
 # OAUTH2_PROVIDER = {
 #     "OIDC_ENABLED": True,
