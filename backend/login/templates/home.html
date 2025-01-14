@@ -1,66 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Login/Register Page</title>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-	<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Train</title>
+    {% load static %}
+    {% load socialaccount %}
+    <link rel="stylesheet" href="{% static 'login/style.css' %}">
+    <script src="{% static 'login/app.js' %}"></script>
 </head>
 <body>
-	<div class="container">
-		<div class="row justify-content-center">
-			<div class="col-md-4">
-				<div id="login-page">
-					<div class="text-center"><h2>SimpleTrain</h2></div>
-					<form id="login-form">
-						<div class="form-group">
-							<label for="username">Username:</label>
-							<input type="text" class="form-control" id="username" required>
-						</div>
-						<div class="form-group">
-							<label for="password">Password:</label>
-							<input type="password" class="form-control" id="password" required>
-						</div>
-						<button type="submit" class="btn btn-primary">Login</button>
-						<a href="{% provider_login_url 'google' %}?next=/" id="google-signin" class="btn btn-light">
-							<img src="google.png" alt="Google Logo" class="google-logo">
-							Sign in with Google
-						</a>						
-					</form>
-					<p>Don't have an account? <a href="#" id="register-link">Register now</a></p>
-				</div>
-				<div id="register-page" style="display: none;">
-					<div class="text-center"><h2>SimpleTrain</h2></div>
-					<form id="register-form">
-						<div class="form-group">
-							<label for="register-username">Username:</label>
-							<input type="text" class="form-control" id="register-username" required>
-						</div>
-						<div class="form-group">
-							<label for="register-email">Email:</label>
-							<input type="email" class="form-control" id="register-email" required>
-						</div>
-						<div class="form-group">
-							<label for="register-password">Password:</label>
-							<input type="password" class="form-control" id="register-password" required>
-						</div>
-						<div class="form-group">
-							<label for="register-confirm-password">Retype Password:</label>
-							<input type="password" class="form-control" id="register-confirm-password" required>
-							<span id="password-match-error" style="display: none; color: red;">Passwords do not match</span>
-						</div>
-						<button type="submit" class="btn btn-primary">Register</button>
-					</form>
-					<p>Have an account? <a href="#" id="login-link">Log in</a></p>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="container">
+        <h1>Simple Train</h1>
+        <div class="button-group">
+            <!-- Google Sign-In Button -->
+            <a href="{% provider_login_url 'google' %}?next=/" id="google-signin" class="btn">
+                <img src="{% static 'login/images/google.png' %}" alt="Google Logo" class="icon">
+                Sign in with Google
+            </a>
 
-	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-	<script src="app.js"></script>
-	<script src="https://apis.google.com/js/platform.js" async defer></script>
+            <!-- GitHub Sign-In Button -->
+            <a href="{% provider_login_url 'github' %}?next=/" id="github-signin" class="btn github-btn">
+                <img src="{% static 'login/images/gh.png' %}" alt="GitHub Logo" class="icon">
+                Sign in with GitHub
+            </a>
+        </div>
+    </div>
 </body>
 </html>

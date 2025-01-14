@@ -1,0 +1,77 @@
+body {
+	font-family: Arial, sans-serif;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start; /* Align content at the top */
+	min-height: 100vh;
+	margin: 0;
+	background-color: #f0f0f0;
+  }
+  
+  .container {
+	text-align: center;
+	background: #fff;
+	padding: 40px 60px; /* Increased padding for more space inside */
+	border-radius: 10px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+	margin-top: 20px; /* Adds a bit of space from the very top */
+  }
+  
+  h1 {
+	margin-bottom: 30px; /* Adds more space below the title */
+	font-size: 28px;
+	color: #333;
+  }
+  
+  .button-group {
+	display: flex;
+	flex-direction: column;
+	gap: 20px; /* Increased space between buttons */
+  }
+  
+  .btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 15px 20px; /* Increased button size */
+	border: none;
+	border-radius: 5px;
+	font-size: 18px; /* Larger font for the buttons */
+	font-weight: bold;
+	cursor: pointer;
+	transition: background-color 0.2s, transform 0.2s;
+	text-align: center;
+	width: 100%;
+  }
+  
+  .btn img.icon {
+	width: 25px; /* Larger icons */
+	height: 25px;
+	margin-right: 10px;
+  }
+  
+  .btn:hover {
+	transform: translateY(-2px);
+  }
+  
+  #google-signin {
+	background-color: #fff;
+	color: #333;
+	border: 1px solid #ddd;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  #google-signin:hover {
+	background-color: #f7f7f7;
+  }
+  
+  .github-btn {
+	background-color: #333;
+	color: #fff;
+  }
+
+  
+  .github-btn:hover {
+	background-color: #444;
+  }
+  

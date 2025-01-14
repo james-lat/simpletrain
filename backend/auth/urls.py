@@ -33,6 +33,7 @@ urlpatterns = [
     # path('o/', include(oauth2_urls)),
     path('accounts/', include('allauth.urls')),
     path('', include('login.urls')),
-
+    path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
 ]
 
