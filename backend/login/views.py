@@ -10,6 +10,9 @@ from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken  # <-- Add this import
 from django.contrib.auth.models import User  # <-- Import User model
 from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import AccessToken, TokenError
+import requests
 
 
 
@@ -74,29 +77,84 @@ def addUser(request):
     
     return Response({"error": "Method not allowed"}, status=405)
 
+    personal_access = "dckr_pat_FlMcVqJ40aHhv4A_70GouTC0ScU"
 
 
-@api_view(['GET'])
-def getUser(request):
-    return HttpResponse("Hello")
 # @permission_classes([AllowAny])
 class Token(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        # Fetch any user for demonstration
-        user = User.objects.first()
-        
+        # Fetch any user for demonstration purposes
+        User = get_user_model()
+        user = User.objects.first()  # Replace with actual user-fetching logic
+
+        if not user:
+            return Response({'error': 'No user found'}, status=400)
+
         # Generate JWT tokens for the user
         refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
 
+        # Add custom claims to the access token
+        access_token['docker_access'] = True
+
+        # Debugging: Check token payload
+        print(f"Access Token Payload: {access_token.payload}")
+
+        # Construct the response
         content = {
             'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'access': str(access_token),  # Convert access token to string
+            'docker_access': access_token.payload.get('docker_access')  # Extract claim for validation
         }
-
         return Response(content)
     
 def sample_view(request):
     current_user = request.user
     print(current_user.id)
+
+# @api_view(['GET'])
+class VerifyToken(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return Response({'error': 'Authorization header missing or invalid'}, status=401)
+
+        token = auth_header.split(' ')[1]
+
+        try:
+            decoded_token = AccessToken(token)
+
+            user_id = decoded_token.get('user_id')  # Get the user ID from the token
+            # dockerAccessKey = decoded_token.get('docker_access', False)
+            url = 'https://hub.docker.com/v2/users/login'
+            payload = {
+            'username': 'jameslatimer',
+            'password': 'paHMkKJ2PyT#,),'
+            }   
+            headers = {
+            'Content-Type': 'application/json',
+            }
+
+
+            response = requests.post(url, json=payload, headers=headers)
+
+            #Testing Login
+            if response.status_code == 200:
+                print('Login successful:', response.json())
+            else:
+                print(f'Failed to login. Status code: {response.status_code}, Response: {response.text}')
+            
+            #Showing that we can infact check to see if tokens are valid and can access docker. 
+            return Response({
+                'message': 'Token is valid',
+                'user_id': user_id,
+                'docker_access': decoded_token.get('docker_access'),
+            })
+        
+
+        except TokenError as e:
+            return Response({'error': str(e)}, status=401)
