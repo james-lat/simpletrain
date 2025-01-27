@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import readline from 'readline';
 import chalk from 'chalk';
 import axios from 'axios';
+import https from 'https';
+
 const program = new Command();
 
 program
@@ -12,20 +14,32 @@ program
 program
   .command('login')
   .description('Login with username and password')
-  .action(() => {
+  .action(async() => {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
+    axios.get('https://127.0.0.1:8000/api/auth_link/', {
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: false  // Disable certificate validation
+      })
+    })
+    .then(response => {
+      console.log(response.data);
+    })
+    .catch(error => {
+      console.error(error);
+    });
 
-    rl.question('Enter your username: ', (username) => {
+    rl.question('You need to authenticate here: ', (username) => {
+
       rl.stdoutMuted = true;
-      rl.question('Enter your password: ', (password) => {
-        rl.close();
+      // rl.question('Enter your password: ', (password) => {
+      //   rl.close();
           
-        console.log(`\nUsername: ${username}`);
-        console.log('Password: [hidden]');
-      });
+      //   console.log(`\nUsername: ${username}`);
+      //   console.log('Password: [hidden]');
+      // });
 
       rl._writeToOutput = (string) => {
         if (rl.stdoutMuted) {

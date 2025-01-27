@@ -29,7 +29,7 @@ app_name = 'login'
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),    
     # path('o/', include(oauth2_urls)),
     path('accounts/', include('allauth.urls')),
     path('', include('login.urls')),

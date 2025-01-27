@@ -13,17 +13,49 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 import requests
-
-
-
-# Create your views here.
+import uuid
+from datetime import datetime, timedelta
+from django.conf import settings
+from django.utils.http import urlencode
+from django.contrib.sessions.models import Session
 
 def home(request):
-    return(render(request, "home.html"))
+    cli_token = request.GET.get('cli_token', None)
+    if cli_token:
+        request.session['cli_token'] = cli_token
 
-def logout_view(request):
-    logout_view(request)
-    return()
+    # Render the home page
+    return render(request, 'home.html')
+
+def sample_view(request):
+    current_user = request.user
+    print(current_user.id)
+
+sessions = []
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def generate_auth_link(request):
+    cli_token = str(uuid.uuid4())
+    login_url = f"https://127.0.0.1:8000/login/?cli_token={cli_token}"  # Correct URL path
+    return Response(login_url)
+
+    # request.session['authenticated']
+    # sessions[session_id] = {
+    #     "is_authenticated": False,
+    #     "user_id": None,
+    #     "jwt_token": None,
+    #     "expires_at": (datetime.utcnow() + timedelta(minutes=15))  # Keep this as a datetime object
+    # }
+
+    # auth_link = f"{settings.AUTH_PAGE_URL}?session_id={session_id}"
+
+    # # Convert `expires_at` to a string for the JSON response
+    # return JsonResponse({
+    #     "session_id": session_id,
+    #     "auth_link": auth_link,
+    #     "expires_at": sessions[session_id]["expires_at"].isoformat()  # Serialize datetime as a string
+    # })
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -68,8 +100,8 @@ def create_deployment(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@permission_classes([AllowAny])
 def addUser(request):
+    permission_classes = [AllowAny]
     if request.method == 'POST':
         data = request.data  
         print("Received data:", data)  
@@ -80,14 +112,12 @@ def addUser(request):
     personal_access = "dckr_pat_FlMcVqJ40aHhv4A_70GouTC0ScU"
 
 
-# @permission_classes([AllowAny])
 class Token(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        # Fetch any user for demonstration purposes
         User = get_user_model()
-        user = User.objects.first()  # Replace with actual user-fetching logic
+        user = User.objects.first()  
 
         if not user:
             return Response({'error': 'No user found'}, status=400)
@@ -105,14 +135,11 @@ class Token(APIView):
         # Construct the response
         content = {
             'refresh': str(refresh),
-            'access': str(access_token),  # Convert access token to string
-            'docker_access': access_token.payload.get('docker_access')  # Extract claim for validation
+            'access': str(access_token),  
+            'docker_access': access_token.payload.get('docker_access')  
         }
         return Response(content)
     
-def sample_view(request):
-    current_user = request.user
-    print(current_user.id)
 
 # @api_view(['GET'])
 class VerifyToken(APIView):
@@ -144,7 +171,7 @@ class VerifyToken(APIView):
 
             #Testing Login
             if response.status_code == 200:
-                print('Login successful:', response.json())
+                print('Login successfuåçl:', response.json())
             else:
                 print(f'Failed to login. Status code: {response.status_code}, Response: {response.text}')
             

@@ -5,8 +5,9 @@ from . import views
 from .views import Token, VerifyToken
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", views.home),
-    path("logout", views.logout_view),
+    # path("logout", views.logout_view),
+    path("login/", views.home),
+    path("api/auth_link/", views.generate_auth_link),
     path('addUser/', views.addUser, name='addUser'),
     path('api/token/', Token.as_view(), name='token'),
     path('api/create-deployment/', views.create_deployment, name='create_deployment'),
