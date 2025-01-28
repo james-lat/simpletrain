@@ -25,7 +25,7 @@ def home(request):
         request.session['cli_token'] = cli_token
 
     # Render the home page
-    return render(request, 'home.html')
+    return render(request, 'home.html', {"cli_token": cli_token})
 
 def sample_view(request):
     current_user = request.user

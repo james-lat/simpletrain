@@ -67,6 +67,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'login.User'
 
 AUTH_PAGE_URL = "https://127.0.0.1:8000/accounts/login/"
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'https://127.0.0.1:8000/accounts/google/login/callback/'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
