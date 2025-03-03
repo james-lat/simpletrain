@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
-from .models import Deployment, Organization, User
+from .models import Deployment, Organization, User, CLIToken
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
@@ -18,44 +18,67 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils.http import urlencode
 from django.contrib.sessions.models import Session
+import logging
+from .signals import cli_token_authenticated_changed
 
-def home(request):
-    cli_token = request.GET.get('cli_token', None)
-    if cli_token:
-        request.session['cli_token'] = cli_token
+logger = logging.getLogger(__name__)
+# def home(request):
+#     print("deez nuts")
+#     cli_token = request.GET.get('cli_token', None)
+    
+#     if cli_token:
+#         request.session['cli_token'] = cli_token
+#         request.session["cli_token_authenticated"] = False
+#         request.session.modified = True
 
-    # Render the home page
-    return render(request, 'home.html', {"cli_token": cli_token})
+#     # Render the home page
+#     return render(request, 'home.html', {"cli_token": cli_token})
 
-def sample_view(request):
-    current_user = request.user
-    print(current_user.id)
 
-sessions = []
+
+def cli_auth(request, token):
+    request.session["cli_token"] = str(token)
+    request.session["cli_token_authenticated"] = False
+    request.session.modified = True
+    print("")
+    try:
+        logger.debug(f"cli_auth - Token: {token}, User: {request.user.email or request.user.username} (ID: {request.user.id})")
+        if(request.user.email or request.user.username):
+            logger.debug(f"User: {request.user.email or request.user.username}")
+            request.session["cli_token_authenticated"] = True
+            print(True)
+            cli_token_authenticated_changed.send(sender=None, request=request, value=True)
+            request.session.modified = True
+
+            
+    except:
+        print("not logged in")
+
+    return render(request, "home.html", {"cli_token": token})
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def generate_auth_link(request):
-    cli_token = str(uuid.uuid4())
-    login_url = f"https://127.0.0.1:8000/login/?cli_token={cli_token}"  # Correct URL path
-    return Response(login_url)
+    #CHECK IF ALREADY LOGGED IN
+    cli_token = CLIToken.objects.create()
+    token_str = str(cli_token.token)
+    request.session["cli_token"] = token_str
+    is_google_authenticated = request.user.is_authenticated and request.user.socialaccount_set.filter(provider='google').exists()
+    request.session["cli_token_authenticated"] = is_google_authenticated
+    print("ISGOOGLE")
+    print(is_google_authenticated)
+    request.session.modified = True
 
-    # request.session['authenticated']
-    # sessions[session_id] = {
-    #     "is_authenticated": False,
-    #     "user_id": None,
-    #     "jwt_token": None,
-    #     "expires_at": (datetime.utcnow() + timedelta(minutes=15))  # Keep this as a datetime object
-    # }
+    auth_url = f"https://127.0.0.1:8443/auth/cli/{token_str}/"
+    ws_auth_url = f"wss://127.0.0.1:8443/ws/auth/cli/{token_str}/"
+    return Response({"auth_url": auth_url, "ws_auth_url": ws_auth_url})
 
-    # auth_link = f"{settings.AUTH_PAGE_URL}?session_id={session_id}"
-
-    # # Convert `expires_at` to a string for the JSON response
-    # return JsonResponse({
-    #     "session_id": session_id,
-    #     "auth_link": auth_link,
-    #     "expires_at": sessions[session_id]["expires_at"].isoformat()  # Serialize datetime as a string
-    # })
-
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def auth_status(request):
+    cli_token_authenticated = request.session.get("cli_token_authenticated", False)
+    logger.debug(f"Auth status: {cli_token_authenticated}, User: {request.user.email or request.user.username if request.user.is_authenticated else 'Anonymous'} (ID: {request.user.id if request.user.is_authenticated else 'None'})")
+    return Response({"cli_token_authenticated": cli_token_authenticated})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -109,7 +132,7 @@ def addUser(request):
     
     return Response({"error": "Method not allowed"}, status=405)
 
-    personal_access = "dckr_pat_FlMcVqJ40aHhv4A_70GouTC0ScU"
+    # personal_access = "dckr_pat_FlMcVqJ40aHhv4A_70GouTC0ScU"
 
 
 class Token(APIView):
@@ -122,17 +145,13 @@ class Token(APIView):
         if not user:
             return Response({'error': 'No user found'}, status=400)
 
-        # Generate JWT tokens for the user
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
 
-        # Add custom claims to the access token
         access_token['docker_access'] = True
 
-        # Debugging: Check token payload
         print(f"Access Token Payload: {access_token.payload}")
 
-        # Construct the response
         content = {
             'refresh': str(refresh),
             'access': str(access_token),  

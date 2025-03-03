@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
-
+# import adapters
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,12 +21,23 @@ load_dotenv()
 
 OIDC_RSA_PRIVATE_KEY = os.getenv('OIDC_RSA_PRIVATE_KEY')
 
-# Application definition
 ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/'
 
 CLIENT_ID = "781744511362-9d5go25ee5l9ur3lp17it26e1ts06ejo.apps.googleusercontent.com"
 CLIENT_SECRET = "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"
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  
+LOGIN_REDIRECT_URL = '/'  
+# SOCIALACCOUNT_ADAPTER = 'auth.adapters.MySocialAccountAdapter'
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_SAVE_EVERY_REQUEST = True
+ASGI_APPLICATION = "auth.asgi.application"
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -34,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'daphne',
+    'django.contrib.staticfiles',  
     'login',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -45,6 +57,17 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'django.contrib.sites',
 ]
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 # ACCOUNT_ADAPTER = 'myapp.adapters.NoSignupAdapter'
 # SOCIALACCOUNT_ADAPTER = 'myapp.adapters.RestrictedSocialAccountAdapter'
@@ -66,8 +89,8 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'login.User'
 
-AUTH_PAGE_URL = "https://127.0.0.1:8000/accounts/login/"
-SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'https://127.0.0.1:8000/accounts/google/login/callback/'
+AUTH_PAGE_URL = "https://127.0.0.1:8443/accounts/login/"
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'https://127.0.0.1:8443/accounts/google/login/callback/'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
@@ -87,6 +110,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -156,7 +180,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_URL = '/admin/login/'
+LOGIN_URL = '/admin/login/' 
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -166,9 +190,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
-# Static files
-STATIC_URL = 'static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
