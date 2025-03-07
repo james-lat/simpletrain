@@ -1,0 +1,197 @@
+To connect client.mjs to client server it requires access to the clients kubeconfig file. 
+Then you need to establish an ssh connection use: ssh -L 6443:127.0.0.1:55476 sammydabbas@192.168.40.126
+
+
+await k8sApi.createNamespacedDeployment({
+  namespace: 'default',         // string (required): The namespace in which to create the Deployment
+  body: {
+    // object (required): A valid Deployment manifest (V1Deployment)
+    // Usually includes apiVersion, kind, metadata, and spec
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
+    metadata: {
+      name: 'my-deployment',
+    },
+    spec: {
+      replicas: 1,
+      selector: {
+        matchLabels: { app: 'my-app' },
+      },
+      template: {
+        metadata: {
+          labels: { app: 'my-app' },
+        },
+        spec: {
+          containers: [
+            {
+              name: 'my-container',
+              image: 'nginx',
+            },
+          ],
+        },
+      },
+    },
+  },
+  pretty: 'true',               // string (optional): If set to 'true', prints output in a more human-readable format
+  dryRun: 'All',                // string (optional): If specified, do not persist changes. Valid values often 'All'
+  fieldManager: 'my-manager',   // string (optional): Name of the actor making the changes, for conflict resolution
+  fieldValidation: 'Strict',    // string (optional): How the server should handle unknown fields ('Strict', 'Warn', etc.)
+});
+
+
+
+await k8sCoreApi.createNamespacedService({
+  namespace: 'default',        // string (required): Namespace to place the Service
+  body: {
+    // object (required): A valid Service manifest (V1Service)
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: 'my-service',
+    },
+    spec: {
+      selector: { app: 'my-app' },
+      ports: [
+        {
+          port: 80,
+          targetPort: 80,
+          protocol: 'TCP',
+        },
+      ],
+    },
+  },
+  pretty: 'true',              // string (optional): Pretty-print the output
+  dryRun: 'All',               // string (optional): If set, changes won't be persisted
+  fieldManager: 'my-manager',  // string (optional): Actor name for conflict resolution
+  fieldValidation: 'Strict',   // string (optional): Validation strategy for unknown fields
+});
+
+
+await k8sNetworkingApi.createNamespacedIngress({
+  namespace: 'default',          // string (required): Namespace for the Ingress
+  body: {
+    // object (required): An Ingress manifest (V1Ingress)
+    apiVersion: 'networking.k8s.io/v1',
+    kind: 'Ingress',
+    metadata: {
+      name: 'my-ingress',
+    },
+    spec: {
+      rules: [
+        {
+          host: 'example.com',
+          http: {
+            paths: [
+              {
+                path: '/',
+                pathType: 'ImplementationSpecific',
+                backend: {
+                  service: {
+                    name: 'my-service',
+                    port: {
+                      number: 80,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+      // Optional: ingressClassName, TLS config, etc.
+    },
+  },
+  pretty: 'true',                // string (optional): Output formatting
+  dryRun: 'All',                 // string (optional): Don't persist changes if specified
+  fieldManager: 'my-manager',    // string (optional): Manager name for conflict resolution
+  fieldValidation: 'Strict',     // string (optional): Handling of unknown fields
+});
+
+
+await k8sApi.deleteNamespacedDeployment({
+  name: 'my-deployment',      // string (required): The name of the Deployment to delete
+  namespace: 'default',       // string (required): The namespace containing the Deployment
+  pretty: 'true',             // string (optional): Pretty-print the output
+  dryRun: 'All',              // string (optional): If set, changes won't be persisted
+  gracePeriodSeconds: 0,      // number (optional): Seconds to wait before killing the Pods
+  orphanDependents: false,    // boolean (deprecated/optional): Whether to orphan dependent objects
+  propagationPolicy: 'Foreground',  // string (optional): Controls garbage collection. Valid values: 'Foreground', 'Background', 'Orphan'
+  body: {                     // object (optional): V1DeleteOptions. Provide custom delete options
+    gracePeriodSeconds: 0,
+  },
+});
+
+
+const podListResponse = await k8sCoreApi.listNamespacedPod({
+  namespace: 'default',         // string (required): Which namespace to list Pods from
+  pretty: 'true',               // string (optional): Pretty-print the output
+  allowWatchBookmarks: false,   // boolean (optional): If 'true', watch will allow bookmarks. Usually not needed if you're just listing
+  _continue: undefined,         // string (optional): Token for continuing a truncated list call
+  fieldSelector: 'status.phase=Running', // string (optional): Restrict the list of returned objects by fields
+  labelSelector: 'app=my-app',  // string (optional): Restrict the list of returned objects by labels
+  limit: 100,                   // number (optional): Maximum number of Pods to return
+  resourceVersion: undefined,   // string (optional): Shows changes since a specific version
+  resourceVersionMatch: 'NotOlderThan', // string (optional): How to match resourceVersion for consistency
+  timeoutSeconds: 30,           // number (optional): Time allowed for the list/watch call
+  watch: false,                 // boolean (optional): If set to true, this call becomes a watch request
+});
+
+
+const logResponse = await k8sCoreApi.readNamespacedPodLog({
+  name: 'my-pod',              // string (required): Pod name whose logs you want
+  namespace: 'default',        // string (required): The namespace containing this Pod
+  container: 'my-container',   // string (optional): If multiple containers in the Pod, specify which container's logs
+  follow: false,               // boolean (optional): If true, stream the logs
+  insecureSkipTLSVerifyBackend: false, // boolean (optional): If set, skip TLS checks for the log endpoint
+  limitBytes: 1024,            // number (optional): Limit the log output size in bytes
+  pretty: 'true',              // string (optional): Pretty-print the output
+  previous: false,             // boolean (optional): If true, get logs for the previous instance of the container if it crashed
+  sinceSeconds: 300,           // number (optional): Return logs newer than a given time (e.g., last 300s)
+  sinceTime: '2025-01-01T00:00:00Z', // string (optional): Return logs after this RFC3339 time
+  tailLines: 100,              // number (optional): Number of lines from the end of the logs
+  timestamps: true,            // boolean (optional): If true, add timestamps to each log line
+});
+
+const deploymentList = await k8sApi.listNamespacedDeployment({
+  namespace: 'default',             // string (required): Which namespace to list Deployments from
+  pretty: 'true',                   // string (optional): Pretty-print the output
+  allowWatchBookmarks: false,       // boolean (optional): For watch requests, allows watch bookmarks
+  _continue: undefined,             // string (optional): Token for continuing a prior truncated list
+  fieldSelector: 'metadata.name=my-deployment', // string (optional): Filter by certain fields
+  labelSelector: 'app=my-app',      // string (optional): Filter by labels
+  limit: 50,                        // number (optional): Return up to 50 Deployments
+  resourceVersion: undefined,       // string (optional): Return updates after a specific version
+  resourceVersionMatch: 'NotOlderThan', // string (optional): How to handle resourceVersion
+  timeoutSeconds: 30,               // number (optional): Timeout for this list/watch request
+  watch: false,                     // boolean (optional): If true, watch the resource stream
+});
+
+
+potential functions to add: 
+
+patchNamespacedDeployment({name, namespace, body, ...})
+Partially update a Deployment (e.g., patch the replicas or container image).
+
+replaceNamespacedDeployment({name, namespace, body, ...})
+Completely replace an existing Deployment spec.
+
+readNamespacedDeployment({name, namespace, ...})
+Retrieve the details of a specific Deployment.
+
+patchNamespacedService({name, namespace, body, ...})
+Partially update a Service configuration.
+
+replaceNamespacedService({name, namespace, body, ...})
+Fully replace a Service object.
+
+createNamespacedConfigMap({namespace, body, ...})
+Create a ConfigMap to store key-value data for Pods.
+
+listNamespace({ ... })
+List all namespaces in the cluster or watch them.
+
+patchNamespacedIngress({name, namespace, body, ...})
+Patch an existing Ingress to update routes, TLS, etc.
+
+replaceNamespacedIngress({name, namespace, body, ...})
+Fully replace an Ingress definition.
