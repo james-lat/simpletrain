@@ -2,76 +2,96 @@ import { Command } from 'commander';
 import readline from 'readline';
 import chalk from 'chalk';
 import axios from 'axios';
+import https from 'https';
+import WebSocket from 'ws';
+
 const program = new Command();
 
-program
-  .name('my-cli')
-  .description('A CLI that prompts for username and password')
-  .version('1.0.0');
+// Function to fetch the authentication link and cookies
+async function getAuthLink() {
+  try {
+    const response = await axios.get('https://127.0.0.1:8443/api/auth_link/', {
+      withCredentials: true,  // Include cookies in request/response
+      httpsAgent: new https.Agent({ rejectUnauthorized: false }) // Disable cert validation
+    });
+    return {
+      auth_url: response.data.auth_url,
+      ws_auth_url: response.data.ws_auth_url,
+      cookies: response.headers['set-cookie'] || [] // Ensure cookies is an array
+    };
+  } catch (error) {
+    console.error('Error fetching auth_link:', error.message);
+    return null;
+  }
+}
+
+// Function to check authentication status (optional, kept for reference)
+// async function checkAuthStatus() {
+//   try {
+//     const response = await axios.get('https://127.0.0.1:8443/api/auth_status/', {
+//       withCredentials: true,
+//       httpsAgent: new https.Agent({ rejectUnauthorized: false })
+//     });
+//     return response.data.authenticated;
+//   } catch (error) {
+//     console.error('Error checking authentication status:', error.message);
+//     return false;
+//   }
+// }
 
 program
   .command('login')
   .description('Login with username and password')
-  .action(() => {
+  .action(async () => {
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout,
+      output: process.stdout
     });
 
-    rl.question('Enter your username: ', (username) => {
-      rl.stdoutMuted = true;
-      rl.question('Enter your password: ', (password) => {
-        rl.close();
-          
-        console.log(`\nUsername: ${username}`);
-        console.log('Password: [hidden]');
-      });
+    console.log("Fetching authentication link...");
+    const authData = await getAuthLink();
 
-      rl._writeToOutput = (string) => {
-        if (rl.stdoutMuted) {
-          rl.output.write('*');
-        } else {
-          rl.output.write(string);
-        }
-      };
+    if (!authData || !authData.ws_auth_url) {
+      console.log("Failed to fetch authentication link.");
+      rl.close();
+      return;
+    }
+
+    console.log(`You need to authenticate here: ${authData.auth_url}`);
+    console.log(`WebSocket: ${authData.ws_auth_url}`);
+
+    // Create WebSocket with session cookies
+    const socket = new WebSocket(authData.ws_auth_url, {
+      headers: { Cookie: authData.cookies.join('; ') }, // Pass sessionid cookie
+      rejectUnauthorized: false // Ignore SSL certificate verification
+    });
+
+    socket.on('open', () => {
+      console.log("Waiting for authentication confirmation...");
+    });
+
+    socket.on('message', async (data) => {
+      const message = JSON.parse(data);
+      console.log(message);
+
+      if (message.status === "authenticated") {
+        console.log(chalk.green("Login confirmed! Authentication successful!"));
+        socket.close();
+        process.stdin.setRawMode(false);
+        process.stdin.pause();
+        rl.close();
+      } else if (message.status === "pending") {
+        console.log("Authentication still pending...");
+      }
+    });
+
+    socket.on('close', () => {
+      console.log("WebSocket connection closed.");
+    });
+
+    socket.on('error', (err) => {
+      console.error("WebSocket error:", err);
     });
   });
-
-// run this locally using " npx json-server --watch dummy_data.json --port 3000"
-//   make sure json-server is installed using npm install -g json-server  
-program
-  .command('getTemplate <name/id>')
-  .description('get dummy template data using name or ID')
-  .action(async (nameOrId) => {
-    try {
-      const response = await axios.get('http://localhost:3000/templates');
-      const templates = response.data;
-      const template = templates.find(
-        (t) => t.name === nameOrId || t.id.toString() === nameOrId
-      );
-
-      if(!template){
-        console.log("Template not found")
-      }
-      else{
-        console.log("template found")
-        // send template to dockerAPI to turn into image
-        try {
-          console.log("trying create container")
-          const response = await axios.post('http://localhost:3001/create-container', template);
-          console.log("repsonse from post request: \n")
-          console.log(response.data.message)
-        }
-        catch (error){
-          console.log('Error: 1')
-          console.log(error.response?.data || error.message)
-        }
-      }
-    }
-    catch (error){
-      console.log('Error: 2')
-      console.log(error)
-    }
-  })
 
 program.parse(process.argv);

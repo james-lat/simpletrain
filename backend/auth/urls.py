@@ -23,16 +23,27 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib import admin
 from django.urls import include, path
+from django.shortcuts import redirect
+from django.conf import settings
+from login import views
+# from login.views import home
 # from oauth2_provider import urls as oauth2_urls
 
 app_name = 'login'
 
+# def store_cli_token(request):
+#     cli_token = request.GET.get('cli_token', '')
+#     if cli_token:
+#         request.session['cli_token'] = cli_token  # Save token in session
+#     return redirect(f"{settings.AUTH_PAGE_URL}")  # Redirect to Google login
+  
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path("", views.home),
+    path('admin/', admin.site.urls),    
     # path('o/', include(oauth2_urls)),
     path('accounts/', include('allauth.urls')),
     path('', include('login.urls')),
-
+    # path('accounts/google/prelogin/', store_cli_token, name='store_cli_token'),
 ]
 
