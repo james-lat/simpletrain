@@ -20,7 +20,11 @@ from django.utils.http import urlencode
 from django.contrib.sessions.models import Session
 import logging
 from .signals import cli_token_authenticated_changed
-
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.views import OAuth2LoginView
+from django.http import HttpResponseRedirect
+from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
+from django.urls import reverse
 logger = logging.getLogger(__name__)
 # def home(request):
 #     print("deez nuts")
@@ -34,7 +38,35 @@ logger = logging.getLogger(__name__)
 #     # Render the home page
 #     return render(request, 'home.html', {"cli_token": cli_token})
 
-
+class GoogleAuthLoginView(OAuth2LoginView):
+    adapter_class = GoogleOAuth2Adapter
+    
+    def get(self, request, *args, **kwargs):
+        # Get the CLI token from the session (set by generate_auth_link)
+        cli_token = request.session.get('cli_token', None)
+        
+        if not cli_token:
+            # Handle case where no CLI token exists (e.g., redirect to error page)
+            return HttpResponseRedirect('/error/no-token/')
+        
+        # Get the Google OAuth2 authorization URL
+        redirect_url = self.adapter.get_authorize_url()
+        
+        # Prepare query parameters including the CLI token
+        params = {
+            'next': f'/auth/cli/{cli_token}/',  # Use the CLI token in the next parameter
+            'cli_token': cli_token  # Optionally add as a separate query parameter
+        }
+        
+        # Append parameters to the Google OAuth2 URL
+        url_parts = list(urlparse(redirect_url))
+        query = parse_qs(url_parts[4])  # Get existing query parameters
+        query.update(params)  # Add our custom parameters
+        url_parts[4] = urlencode(query, doseq=True)  # Update the query string
+        final_url = urlunparse(url_parts)
+        
+        # Redirect to Google with the modified URL
+        return HttpResponseRedirect(final_url)
 
 def cli_auth(request, token):
     request.session["cli_token"] = str(token)
@@ -59,19 +91,25 @@ def cli_auth(request, token):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def generate_auth_link(request):
-    #CHECK IF ALREADY LOGGED IN
+    # Check if already logged in
     cli_token = CLIToken.objects.create()
     token_str = str(cli_token.token)
     request.session["cli_token"] = token_str
+    
     is_google_authenticated = request.user.is_authenticated and request.user.socialaccount_set.filter(provider='google').exists()
     request.session["cli_token_authenticated"] = is_google_authenticated
     print("ISGOOGLE")
     print(is_google_authenticated)
     request.session.modified = True
 
-    auth_url = f"https://127.0.0.1:8443/auth/cli/{token_str}/"
+    # Generate the Google login URL with the CLI token
+    google_login_url = reverse('google_login') + f'?next=/auth/cli/{token_str}/&cli_token={token_str}'
     ws_auth_url = f"wss://127.0.0.1:8443/ws/auth/cli/{token_str}/"
-    return Response({"auth_url": auth_url, "ws_auth_url": ws_auth_url})
+    
+    return Response({
+        "auth_url": f"https://127.0.0.1:8443{google_login_url}",
+        "ws_auth_url": ws_auth_url
+    })
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
