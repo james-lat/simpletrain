@@ -26,17 +26,6 @@ from django.http import HttpResponseRedirect
 from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
 from django.urls import reverse
 logger = logging.getLogger(__name__)
-# def home(request):
-#     print("deez nuts")
-#     cli_token = request.GET.get('cli_token', None)
-    
-#     if cli_token:
-#         request.session['cli_token'] = cli_token
-#         request.session["cli_token_authenticated"] = False
-#         request.session.modified = True
-
-#     # Render the home page
-#     return render(request, 'home.html', {"cli_token": cli_token})
 
 class GoogleAuthLoginView(OAuth2LoginView):
     adapter_class = GoogleOAuth2Adapter
