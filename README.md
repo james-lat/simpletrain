@@ -9,15 +9,19 @@ Follow these steps to start the login page:
 
 1. **Navigate to the directory:**
    ```bash
-   cd CLI/loginPage
+   cd simpletrain/cli
 
-2. **Enter this into terminal:**
+2. **Navigate to this directory in a second terminal:**
    ```bash
-   python3 -m http.server
+   cd simpletrain/backend
 
-3. **Open your browser and go to:**
+3. **In that same terminal enter:**
    ```bash
-   http://localhost:8000/log.html
+   DJANGO_SETTINGS_MODULE=auth.settings daphne -e ssl:8443:privateKey=key.pem:certKey=cert.pem auth.asgi:application --verbosity 2
+
+4. **In the CLI terminal enter:**
+   ```bash
+   node cli.js login
    
 
 This document is intended for the development team and focuses on the architecture, current state, and next steps for the GPU Training Service project.
