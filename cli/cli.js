@@ -57,6 +57,7 @@ program
       return;
     }
 
+    //Remember websocket check only launches in home.html
     console.log(`You need to authenticate here: ${authData.auth_url}`);
     console.log(`WebSocket: ${authData.ws_auth_url}`);
 
