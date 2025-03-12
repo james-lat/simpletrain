@@ -7,19 +7,30 @@ Todo
 
 Follow these steps to start the login page:
 
-1. **Navigate to the directory:**
-   ```bash
-   cd simpletrain/cli
 
-2. **Navigate to this directory in a second terminal:**
+1. **Navigate to this directory in a terminal:**
    ```bash
    cd simpletrain/backend
 
-3. **In that same terminal enter:**
+2. **Run:**
+   ```bash
+   pip install -r requirements.txt
+
+
+3. **In the backend directory enter:**
+   **for mac:**
    ```bash
    DJANGO_SETTINGS_MODULE=auth.settings daphne -e ssl:8443:privateKey=key.pem:certKey=cert.pem auth.asgi:application --verbosity 2
+   ```
+   **for windows:**
+      ```bash
+   $env:DJANGO_SETTINGS_MODULE="auth.settings"; daphne -e ssl:8443:privateKey=key.pem:certKey=cert.pem auth.asgi:application --verbosity 2
+   ```
+4. **Open a second terminal and navigate to this directory:**
+   ```bash
+  cd simpletrain/cli
 
-4. **In the CLI terminal enter:**
+5. **In the CLI terminal enter:**
    ```bash
    node cli.js login
    
